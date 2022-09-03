@@ -1,0 +1,251 @@
+<html>
+    <head>
+        <title>Human Capabilities - Reaktionstest</title>
+        <meta charset="utf-8"/>
+        <style>
+body {
+    font-family: sans-serif;
+}
+#title{
+    text-align: center;
+}
+#instruction{
+    text-align: center;
+}
+#introduction{
+    text-align: center;
+}
+li{
+    font-size: 25px;
+}
+#zentriert{
+    display: block;
+    text-align: center;
+}
+#stimulus {
+    height: 40px;
+}
+        </style>
+    </head>
+   <body>
+        <h1 id="title">Benutzerumfrage</h1>
+        <h2 id="introduction">Ihnen werden 10 Bilder von Essen gezeigt und sie müssen es dann den Entsprechenden Nationalitäten zuordnen</h2>
+        <h2 id="introduction"> Drücke die entsprechende Taste für das gezeigte Essen</h2>
+        <h2 id="instruction">starte das Experiment mit der Leertaste</h2> 
+        <ul id="instruction2">
+            <li>Mexikanisch: 3</li>
+            <li>Italienisch: 1</li>
+            <li>Chinesisch: 2</li>
+        </ul>
+        <p id="zentriert">
+            <img id="eatings">
+        </p>
+        <p id="time"></p>
+        <p id="count"></p>
+        <p id="amerika"></p>
+        <p id="asien"></p>
+        <p id="europa"></p>
+
+        <script>
+            
+// if true, the experiment is currently active
+let experimentActive = false;
+
+// time at which the stimulus last appeared (in milliseconds, see Date.now())
+let stimulusTimestamp;
+
+// ID of the timeout that is scheduled to make the stimulus appear.
+// Used to cancel tests when the experiment ends.
+let testStimulusTimeout;
+
+// recorded reaction times in milliseconds
+let times = [[], [], []];
+//imageCount
+let imageCount = 0;
+let errors = [0,0,0]
+let success = [0,0,0];
+let chineseImages = [];
+let mexicanImages = [];
+let italianImages = [];
+let allImages = [];
+for(i = 1;i<= 10;i++){
+    chineseImages.push("images/chinese" + i + ".jpg");
+    mexicanImages.push("images/mexican" + i + ".jpg");
+    italianImages.push("images/italian" + i + ".jpg");
+    allImages.push("images/chinese" + i + ".jpg");
+    allImages.push("images/mexican" + i + ".jpg");
+    allImages.push("images/italian" + i + ".jpg");
+}
+shuffle(allImages)
+
+
+
+
+// DOM elements
+let eatingsElement = document.getElementById('eatings');
+let timeElement = document.getElementById('time');
+let countElement = document.getElementById('count');
+let instructionElement = document.getElementById('instruction');
+let amerika = document.getElementById('amerika');
+let asian = document.getElementById('asien');
+let europa = document.getElementById('europa');
+
+function getMean(data) {
+    let sum = 0;
+    for (let value of data) sum += value;
+    return sum / data.length;
+}
+
+function getStandardDeviation(data) {
+    let mean = getMean(data);
+    let squareSum = 0;
+    for (let value of data) squareSum += (value - mean) ** 2;
+    return Math.sqrt(squareSum / data.length);
+}
+
+function clearResults() {
+    timeElement.textContent = '';
+    countElement.textContent = '';
+    amerika.textContent = '';
+    europa.textContent = '';
+    asian.textContent = '';
+    eatingsElement.src = "";
+    imageCount = 0;
+    shuffle(allImages)
+}
+
+function showResults() {
+    countElement.textContent = 'Count: ' + imageCount;
+    console.log(errors)
+    amerika.textContent = 'Mexiko: Fehlerrate: ' + errors[0]*100/imageCount + '%' + " | Median: " + Math.round(getMean(times[0])) + "ms | Standartabweichung: " + Math.round(getStandardDeviation(times[0])) + "ms";
+    asian.textContent = 'Chinesisch: Fehlerrate: ' + errors[1]*100/imageCount + '%' + " | Median: " + Math.round(getMean(times[1])) + "ms | Standartabweichung: " + Math.round(getStandardDeviation(times[1])) + "ms";
+    europa.textContent = 'Italienisch: Fehlerrate: ' + errors[2]*100/imageCount + '%' + " | Median: " + Math.round(getMean(times[2])) + "ms | Standartabweichung: " + Math.round(getStandardDeviation(times[2])) + "ms";
+}
+
+function startTestTrial() {
+    // schedule the stimulus to appear after a random amount of time
+    let timeToWaitInSeconds = Math.random() * 4 + 2; // 2 - 6s
+    testStimulusTimeout = setTimeout(showImage, timeToWaitInSeconds * 1000);
+}
+
+function showImage(){
+    experimentActive = true;
+    eatingsElement.src = allImages[imageCount];
+    eatingsElement.width = 500;
+    eatingsElement.height = 500;
+    stimulusTimestamp = Date.now();
+}
+
+function recordStimulusReactionTime() {
+    let deltaTime = Date.now() - stimulusTimestamp;
+    addTimes(deltaTime);
+    timeElement.textContent = deltaTime + ' ms';
+    clearTimeout(testStimulusTimeout);
+    imageCount++;
+}
+
+function startExperiment() {
+    clearResults(); // clear results of any previous tests
+    instructionElement.textContent = "Drücke die entsprechende taste so schnell wie möglich wenn ein Bild erscheint";
+
+    // reset data and start tests
+    times = [[], [], []];
+    startTestTrial();
+}
+
+function stopExperiment() {
+    // cancel any ongoing tests
+    clearTimeout(testStimulusTimeout);
+    stimulusIsVisible = false;
+    experimentActive = false;
+
+    // reset instruction and show results
+    instruction.textContent = 'starte das Experiment mit der Leertaste';
+    showResults();
+    
+}
+
+function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function addErrors(){
+    if(mexicanImages.includes(allImages[imageCount])){
+        errors[0]++;
+    }else if(chineseImages.includes(allImages[imageCount])){
+        errors[1]++;
+    }else if(italianImages.includes(allImages[imageCount])){
+        errors[2]++;
+    }
+}
+function addTimes(deltaTime){
+    if(mexicanImages.includes(allImages[imageCount])){
+        times[0].push(deltaTime);
+    }else if(chineseImages.includes(allImages[imageCount])){
+        times[1].push(deltaTime);
+    }else if(italianImages.includes(allImages[imageCount])){
+        times[2].push(deltaTime);
+    }
+}
+
+window.addEventListener('keydown', (event) => {
+    if (event.key === ' ') {
+        // the user pressed the space key
+        if (!experimentActive) {
+            // start the experiment if it wasn't active
+            startExperiment();
+            return;
+        }
+    }
+
+    if (experimentActive && !eatingsElement.src.includes("images/green.jpg") && !eatingsElement.src.includes("images/red.png")) {
+        if(event.key === '3'){
+            if(mexicanImages.includes(allImages[imageCount])){
+                success[0]++;
+                eatingsElement.src = "images/green.jpg"
+            }else{
+                addErrors()
+                eatingsElement.src = "images/red.png"
+            }
+            recordStimulusReactionTime();
+            startTestTrial();
+        }else if(event.key === '2'){
+            if(chineseImages.includes(allImages[imageCount])){
+                success[1]++;
+                eatingsElement.src = "images/green.jpg"
+            }else{
+                addErrors()
+                eatingsElement.src = "images/red.png"
+            }
+            recordStimulusReactionTime();
+            startTestTrial();
+        }else if(event.key === '1'){
+            if(italianImages.includes(allImages[imageCount])){
+                success[2]++;
+                eatingsElement.src = "images/green.jpg"
+            }else{
+                addErrors()
+                eatingsElement.src = "images/red.png"
+            }
+            recordStimulusReactionTime();
+            startTestTrial();
+        }
+        if(imageCount >= allImages.length){
+            stopExperiment()
+        }
+        // record reaction time
+       
+    } else if (event.key === 'a') {
+            if(experimentActive){
+            // stop the experiment and show results
+            stopExperiment();
+        }
+    }
+});
+      </script>
+   </body>
+</html>

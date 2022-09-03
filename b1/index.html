@@ -1,0 +1,240 @@
+<html>
+    <head>
+        <title>Human Capabilities - Reaction test</title>
+        <style>
+body {
+    font-family: sans-serif;
+}
+#stimulus {
+    height: 40px;
+}
+        </style>
+    </head>
+   <body>
+        <h1 id="title">User Study B.1) from Martin, Maxi, Philipp</h1>
+        <h3 id="instruction2">Press space as soon as you see the red circle appear.</h3>
+        <h2 id="instruction">Press space to start!</h2>
+        <canvas id="circle" width="100" height="100"></canvas>
+        <p id="time"></p>
+        <p id="count"></p>
+        <p id="mean"></p>
+        <p id="sd"></p>
+        <p id="errors"></p>
+        <p id="errorRate"></p>
+        <p id=correlation></p>
+
+        <script>
+
+            
+// if true, the experiment is currently active
+let experimentActive = false;
+
+// if true, the stimulus is currently visible and the user should press space
+let stimulusIsVisible = false;
+
+// time at which the stimulus last appeared (in milliseconds, see Date.now())
+let stimulusTimestamp;
+
+// ID of the timeout that is scheduled to make the stimulus appear.
+// Used to cancel tests when the experiment ends.
+let testStimulusTimeout;
+
+// recorded reaction times in milliseconds
+let times = [];
+let distances = [];
+let errors = 0;
+
+// DOM elements
+let timeElement = document.getElementById('time');
+let countElement = document.getElementById('count');
+let meanElement = document.getElementById('mean');
+let stdDevElement = document.getElementById('sd');
+let instructionElement = document.getElementById('instruction');
+let instruction2Element = document.getElementById('instruction2');
+let circleElement = document.getElementById('circle');
+let errorElement = document.getElementById('errors');
+let errorRateElement = document.getElementById('errorRate');
+let correlationElement = document.getElementById('correlation');
+
+
+
+function drawCircle()
+{
+    var ctx = circleElement.getContext('2d');
+    var R = 50;
+    var X = 50;
+    var Y = 50;
+    ctx.beginPath();
+    ctx.arc(X, Y, R, 0, 2 * Math.PI, false);
+    ctx.fillStyle = '#FF0000'; 
+    ctx.fill()
+    circleElement.style.opacity = "0.5";
+}
+
+function moveCircle() {
+    circleElement.style.left = Math.random() * (window.innerWidth - 300);
+    circleElement.style.top = Math.random() * (window.innerHeight - 300);
+    let size = 100;
+    size = size + "px";
+    circleElement.style.width = size;
+    circleElement.style.width = size;
+}
+
+function getMean(data) {
+    let sum = 0;
+    for (let value of data) sum += value;
+    return sum / data.length;
+}
+
+function getStandardDeviation(data) {
+    let mean = getMean(data);
+    let squareSum = 0;
+    for (let value of data) squareSum += (value - mean) ** 2;
+    return Math.sqrt(squareSum / data.length);
+}
+
+function calcCov(time, distance) {
+    let meanTime = getMean(time);
+    let meanDist = getMean(distance);
+    let sum = 0;
+    for (let i = 0; i < time.length; i++) {
+        sum += (time[i] - meanTime) * (distance[i] - meanDist); 
+    }
+    return sum / time.length;
+}
+
+function clearResults() {
+    timeElement.textContent = '';
+    countElement.textContent = '';
+    meanElement.textContent = '';
+    stdDevElement.textContent = '';
+
+    errorElement.textContent = '';
+}
+
+function showResults() {
+    let meanDeltaTime = getMean(times);
+    let stdDev = getStandardDeviation(times);
+    countElement.textContent = 'Count: ' + times.length + '/30';
+    meanElement.textContent = 'Mean: ' + Math.round(meanDeltaTime) + ' ms';
+    stdDevElement.textContent = 'SD: ' + Math.round(stdDev) + ' ms';
+
+    errorElement.textContent = 'Errors: ' + errors;
+    errorRateElement.textContent = 'Error Rate: ' + (errors / times.length);
+
+    let r = calcCov(times, distances) / (getStandardDeviation(times) * getStandardDeviation(distances));
+    correlationElement.textContent = 'Correlation: ' + r;
+
+}
+
+
+function startTestTrial() {
+    // reset the stimulus
+    stimulusIsVisible = false;
+
+    // schedule the stimulus to appear after a random amount of time
+    let timeToWaitInMillis = Math.random() * 4 + 2; // 2 - 6s
+    testStimulusTimeout = setTimeout(showStimulus, timeToWaitInMillis * 1000);
+}
+
+function showStimulus() {
+    drawCircle();
+    moveCircle();
+    stimulusIsVisible = true;
+    stimulusTimestamp = Date.now();
+    visibleCircle();
+}
+
+function visibleCircle() {
+
+    if (Date.now() - stimulusTimestamp >= 20000) {
+        return;
+    }
+
+    circleElement.style.opacity = (Date.now() - stimulusTimestamp) /  20000 ;
+    setTimeout(() => {visibleCircle();}, 20);
+}
+
+function hideCircle() {
+    circleElement.getContext('2d').clearRect(0,  0, circleElement.width, circleElement.height);
+}
+
+function recordStimulusReactionTime() {
+    let deltaTime = Date.now() - stimulusTimestamp;
+    times.push(deltaTime);
+    let distance = (circleElement.getBoundingClientRect().left + 50) * (circleElement.getBoundingClientRect().left + 50);
+    distance += (circleElement.getBoundingClientRect().top + 50) * (circleElement.getBoundingClientRect().top + 50);
+    distance = Math.sqrt(distance);
+    distances.push( distance );
+
+    timeElement.textContent = deltaTime + ' ms';
+    countElement.textContent = 'Count: ' + times.length + '/30';
+    circleElement.getContext('2d').clearRect(0,  0, circleElement.width, circleElement.height);
+}
+
+function startExperiment() {
+    clearResults(); // clear results of any previous tests
+    instructionElement.style.display = "none";
+    instruction2Element.textContent = "Press space as soon as you see the red circle appear.";
+
+    circleElement.style.position = 'absolute';
+    circleElement.style.left = 0;
+    circleElement.style.top = 0;
+
+    // reset data and start tests
+    times = [];
+    distances = [];
+    experimentActive = true;
+    errors = 0;
+    
+    startTestTrial();
+}
+
+function stopExperiment() {
+    // cancel any ongoing tests
+    clearTimeout(testStimulusTimeout);
+    stimulusIsVisible = false;
+    experimentActive = false;
+    circleElement.getContext('2d').clearRect(0,  0, circleElement.width, circleElement.height);
+
+    // reset instruction and show results
+    instruction.textContent = 'Press space to start!';
+}
+
+window.addEventListener('keydown', (event) => {
+    if (event.key === ' ') {
+        // the user pressed the space key
+        if (!experimentActive) {
+            // start the experiment if it wasn't active
+            startExperiment();
+            return;
+        }
+
+        if (times.length >= 30) {
+            stopExperiment();
+            showResults();
+            instruction2Element.textContent = "Thank you very much. Please return the results to us.";
+        } else if (stimulusIsVisible) {
+            // record reaction time
+            recordStimulusReactionTime();
+            // start next trial
+            startTestTrial();
+        }
+        else {
+            errors++;
+        }
+    } else if (event.key === 'a') {
+        if (experimentActive) {
+            // stop the experiment and show results
+            stopExperiment();
+            showResults();
+        }
+    }  else if (event.key === 'b') {
+        // ...
+    }
+});
+      </script>
+   </body>
+</html>
+
+

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <title>Paper Manager</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=0.1">
+    <script language="javascript" type="text/javascript" src="script.js"></script>
+    <link rel="stylesheet" href="stylesheet.css">
+</head>
+<body>
+    <div class="popup" id="popup">
+        <p id="popupText" class="popupText">
+            Die Lesezeit f&uuml;r diesen Artikel wurde &uuml;berschritten
+        </p>
+        <button id="zumArtikel">Zum Artikel</button>
+        <button onclick="closePopup()">Ok</button>
+    </div>
+    <div class="popup2" id="popup2">
+        <label class="title">Titel:</label>
+        <input type="text" id="titleInput" name="fname"><br><br>
+        <label class="title">Author:</label>
+        <input type="text" id="authorInput" name="fname"><br><br>
+        <label class="title">Datum:</label>
+        <input type="text" id="dateInput" name="fname"><br><br>
+        <button onclick="closeAdd()">Ok</button>
+    </div>
+    <div class="popup3" id="popup3">
+        <label class="title">Titel:</label>
+        <input type="text" id="deleteInput" name="fname"><br><br>
+        <button onclick="clickDelete()">L&ouml;schen</button>
+        <button onclick="closeDeletePopup()">Abbrechen</button>
+    </div>
+    <table id="header">
+        <tr>
+            <td id="headerButtonCell">
+                <button id="new" class="new" onclick="openAdd()">+</button>
+            </td>
+            <td id="headerCell">
+                <h1 id="TitleHeader">Papers</h1>
+                <p id="authorHeader" class="authorHeader">
+                    Penis
+                </p>
+            </td>
+            <td>
+                <button id="close" class="close" onclick="pressCloseButton()">&cross;</button>
+                <p class="closeDate" id="closeDate">
+
+                </p>
+            </td>
+        </tr>
+    </table>
+    <ul id="articles">
+        <li id="Title">
+            <table id="contentTitle" class="content">
+                <tr>
+                    <td id="contentTitle" class="contentTitle" onclick="openArticle('Title', 'test', new Date('1.1.2022'))">
+                            <p id="titleTitle" class="title">
+                                Title
+                            </p>
+                            <p id="captionTitle" class="caption">
+                                test
+                            </p>
+                        </td>
+                    <td id="contentOtherTitle" class="contentOther">
+                        <table id="content2Title" class="content2">
+                            <tr>
+                                <td id="hakenTitle" class="haken">&cross;</td>
+                            </tr>
+                            <tr>
+                                <td id="dateTitle" class="date">Date</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </li>
+    </ul>
+    <p id="articleText" class="articleText" >
+        Hier k&ouml;nnte ihr Artikel stehen
+    </p>
+</body>

@@ -1,0 +1,251 @@
+body{
+    background-color: black;
+}
+h1{
+    text-align: center;
+    color: aquamarine;
+    font-size: 9vw;
+    background-color: black;
+
+}
+.close:hover{
+    background-color: grey;
+    cursor: pointer;
+}
+.new:hover{
+    background-color: grey;
+    cursor: pointer;
+}
+#headerButtonCell{
+    width: 20%;
+}
+#headerCell{
+    width: 60%;
+    box-sizing: content-box;
+    background-color: black;
+}
+#header{
+    width: 100%;
+    height: 10vh;
+    background-color: white;
+}
+td{
+    color: antiquewhite;
+    background-color: black;
+}
+tr{
+    color: antiquewhite;
+    background-color: black;
+}
+button:hover{
+    cursor: pointer;
+}
+.content{
+    width: 100%;
+    height: 5vh;
+    background-color: white;
+}
+.content2{
+    width: 100%;
+    background-color: white;
+    height: 100%;
+    padding: 0px;
+}
+.contentTitle{
+    width: 80%;
+    font-size: 4vh;
+}
+.contentTitle:hover{
+    background-color: grey;
+    cursor: pointer;
+}
+.contentOther{
+    width: 20%;
+}
+ul{
+    padding: 0px;
+}
+.contentTitle .title{
+    font-size: 2vh;
+    margin: 0.5vh;
+    font-weight: bold;
+}
+.caption{
+    font-size: 1.5vh;
+    margin: 0.5vh;
+}
+.haken{
+    text-align: center;
+    color: red;
+    font-weight: bold;
+    font-size: 40px;
+    margin: 0;
+}
+button{
+    background-color: black;
+    font-size: 10vh;
+}
+.close{
+    color: red;
+    width: 100%;
+    height: 100%;
+    visibility: visible;
+}
+.new{
+    width: 100%;
+    height: 100%;
+    visibility: visible;
+    color: green;
+}
+.date{
+    text-align: center;
+    font-size: 40px;
+}
+.popup{
+    width: 80%;
+    height: 20vh;
+    position: absolute;
+    top: 50vh;
+    left: 50vw;
+    transform: translate(-50%, -50%) scale(0.1);
+    background-color: white;
+    border-radius: 20px;
+    visibility: hidden;
+    transition: transform 0.4s;
+}
+.open-popup{
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+.popup button{
+    color: white;
+    transform: translate(10%, 0%);
+    width: 80%;
+    height: 20%;
+    font-size: 3vw;
+    margin: 5px;
+    border-radius: 10px;
+}
+.popup p{
+    width: 100%;
+    text-align: center;
+    font-size: 4vw;
+}
+.popup button:hover{
+    background-color: grey;
+    cursor: pointer;
+}
+.popup2{
+    width: 80%;
+    height: 20vh;
+    position: absolute;
+    top: 50vh;
+    left: 50vw;
+    transform: translate(-50%, -50%) scale(0.1);
+    background-color: white;
+    border-radius: 20px;
+    visibility: hidden;
+    transition: transform 0.4s;
+}
+.popup2 button{
+    width: 100%;
+    height: 20%;
+    color: white;
+    font-size: 3vw;
+}
+.popup2 button:hover{
+    cursor: pointer;
+    background-color: grey;
+}
+.popup2 label{
+    font-size: 3vw;
+}
+.popup2 input{
+    width: 70%;
+    height: 15%;
+    font-size: 20px;
+}
+.open-popup2{
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+.invisible{
+    visibility: hidden;
+    position: absolute;
+}
+.absolute{
+    position: absolute;
+}
+.backButton{
+    color: grey;
+}
+.articleText{
+    color: white;
+    font-size: 2vh;
+    visibility: hidden;
+    position: absolute;
+}
+.articleTextShown{
+    position: relative;
+    visibility: visible;
+}
+.authorHeader{
+    text-align: center;
+    color: aqua;
+    font-size: 3vh;
+    visibility: hidden;
+    position: absolute;
+}
+.authorHeaderVisible{
+    visibility: visible;
+    position: relative;
+}
+.closeDate{
+    visibility: hidden;
+    position: absolute;
+    color: white;
+    font-size: 2.5vh;
+}
+.closeDateVisible{
+    visibility: visible;
+    position: relative;
+}
+.popup3 button{
+    color: white;
+    background-color: black;
+    width: 100%;
+    height: 20%;
+    font-size: 2vw;
+}
+.popup3 label{
+    font-size: 3vw;
+    font-weight: bold;
+}
+.popup3 input{
+    font-size: 2.5vw;
+    font-weight: bold;
+    height: 40%;
+    margin-top: 0.5vh;
+    margin-bottom: 0.5vh;
+}
+.popup3 button:hover{
+    background-color: grey;
+    cursor: pointer;
+}
+.popup3{
+    visibility: hidden;
+    position: absolute;
+    background-color: white;
+    border-radius: 20px;
+    top: 50vh;
+    left: 50vw;
+    transform: translate(-50%, -50%) scale(0.1);
+    width: 80%;
+    height: 15vh;
+    transition: transform 0.4s;
+
+}
+.popup3Visible{
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}

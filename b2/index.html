@@ -1,0 +1,304 @@
+<html>
+    <head>
+        <title>Human Capabilities - Reaction test</title>
+        <style>
+body {
+    font-family: sans-serif;
+}
+#stimulus {
+    height: 40px;
+}
+        </style>
+    </head>
+   <body>
+        <h1 id="title">User Study B.2) from Martin, Maxi, Philipp</h1>
+        <h3 id="instruction2">Only press space when a triangle in any color appers! Ignore all circles.</h3>
+        <h2 id="instruction">Press space to start!</h2>
+        <canvas id="circle" width="100" height="100"></canvas>
+        <canvas id="triangle" width="100" height="100"></canvas>
+        <p id="time"></p>
+        <p id="count"></p>
+        <p id="mean"></p>
+        <p id="sd"></p>
+        <p id="countR"></p>
+        <p id="meanR"></p>
+        <p id="sdR"></p>
+        <p id="countY"></p>
+        <p id="meanY"></p>
+        <p id="sdY"></p>
+        <p id="errors"></p>
+        <p id="errorRate"></p>
+
+        <script>
+
+            
+// if true, the experiment is currently active
+let experimentActive = false;
+
+// if true, the stimulus is currently visible and the user should press space
+let stimulusIsVisible = false;
+
+// time at which the stimulus last appeared (in milliseconds, see Date.now())
+let stimulusTimestamp;
+
+// ID of the timeout that is scheduled to make the stimulus appear.
+// Used to cancel tests when the experiment ends.
+let testStimulusTimeout;
+
+// recorded reaction times in milliseconds
+let times = [];
+let timesR = [];
+let timesY = [];
+
+let isRed = false;
+let errors = 0;
+let circleCount = 0;
+
+// DOM elements
+let timeElement = document.getElementById('time');
+let countElement = document.getElementById('count');
+let countRElement = document.getElementById('countR');
+let countYElement = document.getElementById('countY');
+let meanElement = document.getElementById('mean');
+let meanRElement = document.getElementById('meanR');
+let meanYElement = document.getElementById('meanY');
+let stdDevElement = document.getElementById('sd');
+let stdDevRElement = document.getElementById('sdR');
+let stdDevYElement = document.getElementById('sdY');
+let instructionElement = document.getElementById('instruction');
+let instruction2Element = document.getElementById('instruction2');
+let circleElement = document.getElementById('circle');
+let triangleElement = document.getElementById('triangle');
+let errorElement = document.getElementById('errors');
+let errorRateElement = document.getElementById('errorRate');
+
+
+function drawCircle()
+{
+    if (circleElement.getContext) 
+    {
+        var ctx = circleElement.getContext('2d');
+        var R = 50;
+        var X = 50;
+        var Y = 50;
+        ctx.beginPath();
+        ctx.arc(X, Y, R, 0, 2 * Math.PI, false);
+        if (Math.random() > 0.5) {
+            isRed = true;
+            ctx.fillStyle = '#FF0000'; 
+        } else {
+            isRed = false;
+            ctx.fillStyle = '#FFFF00'; 
+        }
+        ctx.fill()
+    }
+}
+
+function moveCircle() {
+    circleElement.style.left = Math.random() * (window.innerWidth - 300);
+    circleElement.style.top = Math.random() * (window.innerHeight - 300);
+    let size = Math.random() * 2 * 100 + 100;
+    size = size + "px";
+    circleElement.style.width = size;
+    circleElement.style.width = size;
+}
+
+function drawTriangle()
+{
+    if (triangleElement.getContext) 
+    {
+        var ctx = triangleElement.getContext('2d');
+        var X = 150;
+        var Y = 150;
+        ctx.beginPath();
+        ctx.moveTo(0, 100);
+        ctx.lineTo(50, 0);
+        ctx.lineTo(100, 100);
+        if (Math.random() > 0.5) {
+            isRed = true;
+            ctx.fillStyle = '#FF0000'; 
+        } else {
+            isRed = false;
+            ctx.fillStyle = '#FFFF00'; 
+        }
+        ctx.fill()
+    }
+}
+
+function moveTriangle() {
+    triangleElement.style.left = Math.random() * (window.innerWidth - 300);
+    triangleElement.style.top = Math.random() * (window.innerHeight - 300);
+    let size = Math.random() * 2 * 100 + 100;
+    size = size + "px";
+    triangleElement.style.width = size;
+    triangleElement.style.width = size;
+}
+
+function getMean(data) {
+    let sum = 0;
+    for (let value of data) sum += value;
+    return sum / data.length;
+}
+
+function getStandardDeviation(data) {
+    let mean = getMean(data);
+    let squareSum = 0;
+    for (let value of data) squareSum += (value - mean) ** 2;
+    return Math.sqrt(squareSum / data.length);
+}
+
+function clearResults() {
+    timeElement.textContent = '';
+    countElement.textContent = '';
+    meanElement.textContent = '';
+    stdDevElement.textContent = '';
+
+    countRElement.textContent = '';
+    meanRElement.textContent = '';
+    stdDevRElement.textContent = '';
+
+    countYElement.textContent = '';
+    meanYElement.textContent = '';
+    stdDevYElement.textContent = '';
+
+    errorElement.textContent = '';
+}
+
+function showResults() {
+    let meanDeltaTime = getMean(times);
+    let stdDev = getStandardDeviation(times);
+    countElement.textContent = 'Count: ' + times.length + '/30';
+    meanElement.textContent = 'Mean: ' + Math.round(meanDeltaTime) + ' ms';
+    stdDevElement.textContent = 'SD: ' + Math.round(stdDev) + ' ms';
+
+    let meanDeltaTimeR = getMean(timesR);
+    let stdDevR = getStandardDeviation(timesR);
+    countRElement.textContent = 'Count Red: ' + timesR.length;
+    meanRElement.textContent = 'Mean Red: ' + Math.round(meanDeltaTimeR) + ' ms';
+    stdDevRElement.textContent = 'SD Red: ' + Math.round(stdDevR) + ' ms';
+
+    let meanDeltaTimeY = getMean(timesY);
+    let stdDevY = getStandardDeviation(timesY);
+    countYElement.textContent = 'Count Yellow: ' + timesY.length;
+    meanYElement.textContent = 'Mean Yellow: ' + Math.round(meanDeltaTimeY) + ' ms';
+    stdDevYElement.textContent = 'SD Yellow: ' + Math.round(stdDevY) + ' ms';
+
+    errorElement.textContent = 'Errors: ' + errors;
+    errorRateElement.textContent = 'Error Rate: ' + (errors / circleCount);
+}
+
+
+function startTestTrial() {
+    // reset the stimulus
+    stimulusIsVisible = false;
+
+    // schedule the stimulus to appear after a random amount of time
+    let timeToWaitInMillis = Math.random() * 4 + 2; // 2 - 6s
+    testStimulusTimeout = setTimeout(showStimulus, timeToWaitInMillis * 1000);
+}
+
+function showStimulus() {
+    if (Math.random() > 0.5) {
+        drawCircle();
+        moveCircle();
+        setTimeout(() => {hideCircle()}, 1500);
+        setTimeout(() => {startTestTrial()}, 2000);
+        circleCount++; 
+    } else {
+        stimulusIsVisible = true;
+        drawTriangle();
+        moveTriangle();
+    }
+    stimulusTimestamp = Date.now();
+}
+
+function hideCircle() {
+    circleElement.getContext('2d').clearRect(0,  0, circleElement.width, circleElement.height);
+}
+
+function recordStimulusReactionTime() {
+    let deltaTime = Date.now() - stimulusTimestamp;
+    times.push(deltaTime);
+    if (isRed) {
+        timesR.push(deltaTime);
+    } else {
+        timesY.push(deltaTime);
+    }
+    timeElement.textContent = deltaTime + ' ms';
+    countElement.textContent = 'Count: ' + times.length + '/30';
+    circleElement.getContext('2d').clearRect(0,  0, circleElement.width, circleElement.height);
+    triangleElement.getContext('2d').clearRect(0,  0, triangleElement.width, triangleElement.height);
+}
+
+function startExperiment() {
+    clearResults(); // clear results of any previous tests
+    instructionElement.style.display = "none";
+    instruction2Element.textContent = "Only press space when a triangle in any color appers! Ignore all circles. Press 'a' for results!";
+
+    circleElement.style.position = 'absolute';
+    circleElement.style.left = 0;
+    circleElement.style.top = 0;
+    triangleElement.style.position = 'absolute';
+    triangleElement.style.left = 0;
+    triangleElement.style.top = 0;
+
+    // reset data and start tests
+    times = [];
+    timesR = [];
+    timesY = [];
+    experimentActive = true;
+    startTestTrial();
+    errors = 0;
+    circleCount = 0;
+}
+
+function stopExperiment() {
+    // cancel any ongoing tests
+    clearTimeout(testStimulusTimeout);
+    stimulusIsVisible = false;
+    experimentActive = false;
+    circleElement.getContext('2d').clearRect(0,  0, circleElement.width, circleElement.height);
+    triangleElement.getContext('2d').clearRect(0,  0, triangleElement.width, triangleElement.height);
+
+    // reset instruction and show results
+    instruction.textContent = 'Press space to start!';
+}
+
+window.addEventListener('keydown', (event) => {
+    if (event.key === ' ') {
+        // the user pressed the space key
+        if (!experimentActive) {
+            // start the experiment if it wasn't active
+            startExperiment();
+            return;
+        }
+
+        if (times.length >= 30) {
+            stopExperiment();
+            showResults();
+            instruction2Element.textContent = "Thank you very much. Please return the results to us.";
+        } else if (stimulusIsVisible) {
+            // record reaction time
+            recordStimulusReactionTime();
+            // start next trial
+            startTestTrial();
+        }
+        else {
+            //window.location.reload();
+            errors++;
+            //instruction2Element.textContent = "[ERROR]: Only press space when a triangle in any color appers! Ignore all circles.\nPress space to restart.";
+            //stopExperiment();
+        }
+    } else if (event.key === 'a') {
+        if (experimentActive) {
+            // stop the experiment and show results
+            stopExperiment();
+            showResults();
+        }
+    }  else if (event.key === 'b') {
+        // ...
+    }
+});
+      </script>
+   </body>
+</html>
